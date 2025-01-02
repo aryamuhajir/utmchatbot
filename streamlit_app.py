@@ -93,7 +93,7 @@ def text_splitting(text):
 def text_embeddings(text_chunks):
     #streamlit deployment secrets
     openai_api_key = st.secrets["general"]["openai_api_key"]
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small", OPENAI_API_KEY = openai_api_key)
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small", api_key=  openai_api_key)
 
     indexx = "utmvector"
     vector_store = PineconeVectorStore.from_texts(texts=text_chunks, embedding=embeddings, index_name=indexx)
@@ -115,7 +115,7 @@ def get_response(query, chat_history):
 and if the answer is not contained within the text below and the context, say 'Informasi tidak ditemukan, silahkan Hubungi CS UTM : 089678838234', full context {result} """
 
     prompt = ChatPromptTemplate.from_template(template)
-    model = OpenAIEmbeddings(model="text-embedding-3-small", OPENAI_API_KEY = openai_api_key)
+    model = OpenAIEmbeddings(model="text-embedding-3-small", api_key=  openai_api_key)
     embed_query = model.embed_query(query)
     process_query = PineconeVectorStore(index_name="utmvector", embedding=model, pinecone_api_key=pinecone_api_key)
     result = process_query.similarity_search(query, k=2)
@@ -123,7 +123,7 @@ and if the answer is not contained within the text below and the context, say 'I
     print(result)
 
 
-    llm = ChatOpenAI(model="gpt-4o-mini", OPENAI_API_KEY = openai_api_key)
+    llm = ChatOpenAI(model="gpt-4o-mini", api_key=  openai_api_key)
 
     chain = prompt | llm | StrOutputParser()
     return chain.stream({
