@@ -93,7 +93,7 @@ def text_splitting(text):
 def text_embeddings(text_chunks):
     #streamlit deployment secrets
     openai_api_key = st.secrets["general"]["openai_api_key"]
-    pinecone_api_keys = st.secrets["pine"]["pinecone"]
+    pinecone_api_keys = st.secrets["general"]["pinecone"]
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small", api_key=  openai_api_key)
 
     indexx = "utmvector"
@@ -111,7 +111,7 @@ def text_embeddings(text_chunks):
 def get_response(query, chat_history):
     #streamlit deployment secrets
     openai_api_key = st.secrets["general"]["openai_api_key"]
-    pinecone_api_keys = st.secrets["pine"]["pinecone"]
+    pinecone_api_keys = st.secrets["general"]["pinecone"]
     template="""Answer the question as truthfully as possible using the provided context. the question is : {user_question}. Chat history: {chat_history}, answer in bahasa indonesia,All the question should be related to UTM (Universitas Trunojoyo Madura) otherwise say 'Pertanyaan di luar cakupan UTM', 
 and if the answer is not contained within the text below and the context, say 'Informasi tidak ditemukan, silahkan Hubungi CS UTM : 089678838234', full context {result} """
 
