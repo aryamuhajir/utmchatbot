@@ -2,7 +2,7 @@ import streamlit as st
 
 
 from PyPDF2 import PdfReader
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, AIMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
@@ -17,7 +17,8 @@ from langchain.chains import conversational_retrieval
 
 
 def main():
-    load_dotenv()
+    #load_dotenv() lokal
+    
     st.set_page_config(page_title="UTM BOT")
     st.title("UTMs BOT")
 
@@ -90,7 +91,9 @@ def text_splitting(text):
     return chunks
 
 def text_embeddings(text_chunks):
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    #streamlit deployment secrets
+    openai_api_key = st.secrets["general"]["openai_api_key"]
+    embeddings = OpenAIEmbeddings(model="text-embedding-3-small", OPENAI_API_KEY = openai_api_key)
 
     indexx = "utmvector"
     vector_store = PineconeVectorStore.from_texts(texts=text_chunks, embedding=embeddings, index_name=indexx)
@@ -105,19 +108,22 @@ def text_embeddings(text_chunks):
 
 #get response
 def get_response(query, chat_history):
+    #streamlit deployment secrets
+    openai_api_key = st.secrets["general"]["openai_api_key"]
+    pinecone_api_key = st.secrets["general"]["pinecone_api_key"]
     template="""Answer the question as truthfully as possible using the provided context. the question is : {user_question}. Chat history: {chat_history}, answer in bahasa indonesia,All the question should be related to UTM (Universitas Trunojoyo Madura) otherwise say 'Pertanyaan di luar cakupan UTM', 
 and if the answer is not contained within the text below and the context, say 'Informasi tidak ditemukan, silahkan Hubungi CS UTM : 089678838234', full context {result} """
 
     prompt = ChatPromptTemplate.from_template(template)
-    model = OpenAIEmbeddings(model="text-embedding-3-small")
+    model = OpenAIEmbeddings(model="text-embedding-3-small", OPENAI_API_KEY = openai_api_key)
     embed_query = model.embed_query(query)
-    process_query = PineconeVectorStore(index_name="utmvector", embedding=model)
+    process_query = PineconeVectorStore(index_name="utmvector", embedding=model, pinecone_api_key=pinecone_api_key)
     result = process_query.similarity_search(query, k=2)
     results = "utm adalah kampus idaman"
     print(result)
 
 
-    llm = ChatOpenAI(model="gpt-4o-mini")
+    llm = ChatOpenAI(model="gpt-4o-mini", OPENAI_API_KEY = openai_api_key)
 
     chain = prompt | llm | StrOutputParser()
     return chain.stream({
