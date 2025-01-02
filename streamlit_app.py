@@ -1,6 +1,6 @@
 import streamlit as st
 
-import pinecone
+
 from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, AIMessage
