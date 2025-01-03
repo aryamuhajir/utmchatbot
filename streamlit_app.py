@@ -1,5 +1,5 @@
 import streamlit as st
-
+import os
 
 from PyPDF2 import PdfReader
 #from dotenv import load_dotenv
@@ -18,10 +18,10 @@ from langchain.chains import conversational_retrieval
 
 def main():
     #load_dotenv() lokal
-    
     st.set_page_config(page_title="UTM BOT")
     st.title("UTMs BOT")
-
+    pinecone_api_keys = st.secrets["general"]["pinecone"]
+    os.environ["PINECONE_API_KEY"] = pinecone_api_keys
     
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
@@ -93,11 +93,10 @@ def text_splitting(text):
 def text_embeddings(text_chunks):
     #streamlit deployment secrets
     openai_api_key = st.secrets["general"]["openai_api_key"]
-    pinecone_api_keys = st.secrets["general"]["pinecone"]
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small", api_key=  openai_api_key)
 
     indexx = "utmvector"
-    vector_store = PineconeVectorStore.from_texts(texts=text_chunks, embedding=embeddings, index_name=indexx, pinecone_api_key=pinecone_api_keys)
+    vector_store = PineconeVectorStore.from_texts(texts=text_chunks, embedding=embeddings, index_name=indexx)
     return vector_store
 
 
@@ -111,14 +110,13 @@ def text_embeddings(text_chunks):
 def get_response(query, chat_history):
     #streamlit deployment secrets
     openai_api_key = st.secrets["general"]["openai_api_key"]
-    pinecone_api_keys = st.secrets["general"]["pinecone"]
     template="""Answer the question as truthfully as possible using the provided context. the question is : {user_question}. Chat history: {chat_history}, answer in bahasa indonesia,All the question should be related to UTM (Universitas Trunojoyo Madura) otherwise say 'Pertanyaan di luar cakupan UTM', 
 and if the answer is not contained within the text below and the context, say 'Informasi tidak ditemukan, silahkan Hubungi CS UTM : 089678838234', full context {result} """
 
     prompt = ChatPromptTemplate.from_template(template)
     model = OpenAIEmbeddings(model="text-embedding-3-small", api_key=  openai_api_key)
     embed_query = model.embed_query(query)
-    process_query = PineconeVectorStore(index_name="utmvector", embedding=model, pinecone_api_key=pinecone_api_keys)
+    process_query = PineconeVectorStore(index_name="utmvector", embedding=model)
     result = process_query.similarity_search(query, k=2)
     results = "utm adalah kampus idaman"
     print(result)
