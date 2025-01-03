@@ -95,7 +95,7 @@ def text_embeddings(text_chunks):
     openai_api_key = st.secrets["general"]["openai_api_key"]
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small", api_key=  openai_api_key)
 
-    indexx = "utmvector"
+    indexx = "utmvectorpreprocessing"
     vector_store = PineconeVectorStore.from_texts(texts=text_chunks, embedding=embeddings, index_name=indexx)
     return vector_store
 
